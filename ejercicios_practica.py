@@ -20,7 +20,7 @@ import sqlite3
 import sqlalchemy
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import session, sessionmaker, relationship
 
 # Crear el motor (engine) de la base de datos
 engine = sqlalchemy.create_engine("sqlite:///secundaria.db")
@@ -65,6 +65,16 @@ def fill():
     # Cada tutor tiene los campos:
     # id --> este campo es auto incremental por lo que no deberá completarlo
     # name --> El nombre del tutor (puede ser solo nombre sin apellido)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    
+    tutor1 = Tutor(name = 'Matias Toniolo')
+    session.add(tutor1)
+    
+    tutor2 = Tutor(name = 'Oscar Mediavilla')
+    session.add(tutor2)
+    
+    session.commit()
 
     # Llenar la tabla de la secundaria con al menos 5 estudiantes
     # Cada estudiante tiene los posibles campos:
@@ -76,6 +86,28 @@ def fill():
 
     # No olvidarse que antes de poder crear un estudiante debe haberse
     # primero creado el tutor.
+    
+    estud_1 = Estudiante(name = 'Cesar Lopez', age = 23, grade = 2, tutor = tutor2)
+    session.add(estud_1)
+    
+    estud_2 = Estudiante(name = 'Mariana Melo', age = 33, grade = 3, tutor = tutor1)
+    session.add(estud_2)
+    
+    estud_3 = Estudiante(name = 'Nicolas Anderson', age = 38, grade = 4, tutor = tutor2)
+    session.add(estud_3)
+    
+    estud_4 = Estudiante(name = 'Natalia Bravo', age = 29, grade = 1, tutor = tutor1)
+    session.add(estud_4)
+    
+    estud_5 = Estudiante(name = 'Sergio Linares', age = 21, grade = 5, tutor = tutor2)
+    session.add(estud_5)
+    
+    estud_6 = Estudiante(name = 'Pamela Rodriguez', age = 43, grade = 5, tutor = tutor1)
+    session.add(estud_6)
+    
+    session.commit()
+    
+            
 
 
 def fetch():
@@ -84,7 +116,15 @@ def fetch():
     # todos los objetos creaods de la tabla estudiante.
     # Imprimir en pantalla cada objeto que traiga la query
     # Realizar un bucle para imprimir de una fila a la vez
-
+    
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    
+    query = session.query(Estudiante)
+    
+    for e in query:
+        print(e)
+        
 
 def search_by_tutor(tutor):
     print('Operación búsqueda!')
@@ -95,6 +135,14 @@ def search_by_tutor(tutor):
     # Para poder realizar esta query debe usar join, ya que
     # deberá crear la query para la tabla estudiante pero
     # buscar por la propiedad de tutor.name
+    
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    
+    query = session.query(Estudiante).join(Estudiante.tutor).filter(Tutor.name == tutor)
+    
+    for i in query:
+        print(i)
 
 
 def modify(id, name):
@@ -109,6 +157,28 @@ def modify(id, name):
 
     # TIP: En clase se hizo lo mismo para las nacionalidades con
     # en la función update_persona_nationality
+    
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    
+    query = session.query(Tutor).filter(Tutor.name == nuevo_tutor)
+    tutor_nuevo = query.first()
+    
+    query = session.query(Estudiante).filter(Estudiante.id == id)
+    est_mod = query.first()
+    
+    est_mod.tutor = tutor_nuevo
+    
+    session.add(est_mod)
+    
+    session.commit()
+    
+    query = session.query(Estudiante)
+    
+    for i in query:
+        print(i)
+        
+    print("Estudiante con id {} fue actualizado, el nuevo tutor es {}".format(id, nuevo_tutor))
 
 
 def count_grade(grade):
@@ -119,20 +189,28 @@ def count_grade(grade):
 
     # TIP: En clase se hizo lo mismo para las nacionalidades con
     # en la función count_persona
+    
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    query = session.query(Estudiante).filter(Estudiante.grade == grade)
+    
+    for i in query:
+        print(i)
 
 
 if __name__ == '__main__':
     print("Bienvenidos a otra clase de Inove con Python")
     create_schema()   # create and reset database (DB)
-    # fill()
-    # fetch()
+    fill()
+    fetch()
 
-    tutor = 'nombre_tutor'
-    # search_by_tutor(tutor)
+    tutor = 'Matias Toniolo'
+    search_by_tutor(tutor)
 
-    nuevo_tutor = 'nombre_tutor'
+    nuevo_tutor = 'Matias Toniolo'
     id = 2
-    # modify(id, nuevo_tutor)
+    modify(id, nuevo_tutor)
 
     grade = 2
-    # count_grade(grade)
+    count_grade(grade)
