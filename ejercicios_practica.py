@@ -193,10 +193,9 @@ def count_grade(grade):
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    query = session.query(Estudiante).filter(Estudiante.grade == grade)
+    query = session.query(Estudiante).filter(Estudiante.grade == grade).count()
     
-    for i in query:
-        print(i)
+    print(query)
 
 
 if __name__ == '__main__':
